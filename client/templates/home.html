@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NG-ach</title>
+</head>
+<body>
+    <h1>Ng-ach імейджборд ЦНТУ</h1>
+    <p>Всі існуючі теми: </p>
+    {%for theme in themes %}
+    <a href="/{{ theme }}">{{ theme }}</a><br>
+    {% endfor %}
+</body>
+</html>
