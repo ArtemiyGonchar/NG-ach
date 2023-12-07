@@ -9,4 +9,4 @@ app.config.from_object(Config)
 db = SQLAlchemy(app) #creating database 
 migrate = Migrate(app, db) # migrate using for upgrade database, like as adding new tables.
 
-from app import routes, models
+from app import routes, models, auth
