@@ -5,7 +5,6 @@ class Posts(db.Model):
     thread_id = db.Column(db.Integer)
     post_text = db.Column(db.String(1024))
     post_date = db.Column(db.DateTime)
-    anon_tripcode = db.Column(db.Integer) # unique user tripcode
 
 class Threads(db.Model):
     id = db.Column(db.Integer, primary_key = True)
