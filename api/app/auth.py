@@ -1,4 +1,5 @@
 from flask_httpauth import HTTPBasicAuth
+from flask import session
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import Admin
 import sqlalchemy
@@ -12,4 +13,5 @@ auth = HTTPBasicAuth()
 def verify_password(username, password):
     admin = Admin.query.filter_by(username=username).first()
     if admin and admin.username == username and check_password_hash(admin.password, password):
+        session['admin_logged_in'] = True
         return username
