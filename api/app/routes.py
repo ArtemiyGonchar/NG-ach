@@ -1,14 +1,12 @@
 from app import app, db
-from flask import Flask, render_template, url_for, redirect, request
+from flask import Flask, render_template, url_for, redirect, request, session
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import Posts, Threads, Themes, Admin
 from app.auth import auth, SECRET_KEY
 import sqlalchemy
 
-#KEY = SECRET_KEY
-ADMIN_AUTH = False
-
+app.config['SECRET_KEY'] = 'your_secret_key'
 
 
 @app.route('/debug-page') #page where we can debug or test new features
@@ -21,9 +19,10 @@ def home_page():
     allThemes = Themes.query.all()
     for theme in allThemes:
         themeNames.append(theme.theme_name)
-    return render_template('home.html', themes = themeNames)
+    admin_logged_in = session.get('admin_logged_in', False)
+    return render_template('home.html', themes = themeNames, adminLogged = admin_logged_in)
 
-
+#-----------------------------ADMIN ROUTES-----------------------------#
 @app.route('/add-theme', methods = ['GET', 'POST']) #easy adding new theme system
 @auth.login_required
 def add_theme():
@@ -34,6 +33,11 @@ def add_theme():
         db.session.commit()
         return redirect('/')
     return render_template('addTheme.html') #for first entering the page with method GET
+
+@app.route('/admin-log')
+@auth.login_required
+def admin_log():
+    return redirect('/')
 
 
 @app.route('/admin-reg', methods = ['GET', 'POST'])
@@ -48,4 +52,4 @@ def admin_reg():
         else:
             return "Permission denied"
     return render_template('reg.html')
-app.run(hots='0.0.0.0', port=8080)
+app.run(host='0.0.0.0', port=8080)
