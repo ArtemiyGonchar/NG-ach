@@ -22,6 +22,10 @@ def home_page():
     admin_logged_in = session.get('admin_logged_in', False)
     return render_template('home.html', themes = themeNames, adminLogged = admin_logged_in)
 
+@app.route('/<theme>')
+def theme_page(theme):
+    return render_template('themePage.html', theme_name = theme)
+    
 #-----------------------------ADMIN ROUTES-----------------------------#
 @app.route('/add-theme', methods = ['GET', 'POST']) #easy adding new theme system
 @auth.login_required
@@ -34,13 +38,27 @@ def add_theme():
         return redirect('/')
     return render_template('addTheme.html') #for first entering the page with method GET
 
+@app.route('/remove-theme', methods = ['POST'])
+@auth.login_required
+def remove_theme():
+    theme = request.form.get('remove')
+    db.session.query(Themes).filter(Themes.theme_name == theme).delete()
+    db.session.commit()
+    return redirect('/')
+
 @app.route('/admin-log')
 @auth.login_required
 def admin_log():
     return redirect('/')
 
 
-@app.route('/admin-reg', methods = ['GET', 'POST'])
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    return redirect('/')
+
+
+@app.route('/admin-reg', methods = ['POST'])
 def admin_reg():
     if request.method == 'POST':
         if request.form.get('secretkey') == SECRET_KEY:
@@ -52,4 +70,6 @@ def admin_reg():
         else:
             return "Permission denied"
     return render_template('reg.html')
+
+
 app.run(host='0.0.0.0', port=8080)
