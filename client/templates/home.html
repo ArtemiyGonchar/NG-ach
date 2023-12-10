@@ -9,11 +9,20 @@
     <h1>Ng-ach імейджборд ЦНТУ</h1>
     {% if adminLogged == True %}
     <p>ADMIN LOGGED</p>
+    <form action="/logout">
+        <button>logout</button>
+    </form>
     <a href="/add-theme">add theme</a>
     {% endif %}
     <p>Всі існуючі теми: </p>
     {%for theme in themes %}
-    <a href="/{{ theme }}">{{ theme }}</a><br>
+    <a href="/{{ theme }}">{{ theme }}</a>
+    {% if adminLogged == True %}
+    <form action="/remove-theme" method="post">
+        <button name="remove" value="{{ theme }}">remove</button>
+    </form>
+    {% endif %}
+    <br>
     {% endfor %}
 </body>
 </html>
