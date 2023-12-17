@@ -2,13 +2,15 @@ from app import app, db
 from flask import Flask, render_template, url_for, redirect, request, session
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from app.models import Posts, Threads, Themes, Admin
 from app.auth import auth, SECRET_KEY
 import sqlalchemy
+import os, datetime
 
 app.config['SECRET_KEY'] = 'your_secret_key'
-
-
+filename_list = os.listdir(app.config['UPLOAD_FOLDER'])
+print(filename_list)
 @app.route('/debug-page') #page where we can debug or test new features
 def debug_page():
     return render_template('test.html')
@@ -24,8 +26,46 @@ def home_page():
 
 @app.route('/<theme>')
 def theme_page(theme):
-    return render_template('themePage.html', theme_name = theme)
-    
+    threads = Threads.query.filter_by(theme = theme)
+    return render_template('themePage.html', theme_name = theme, thread= threads)
+
+@app.route('/<theme>/<thread>', methods = ['GET', 'POST'])
+def thread_page(theme, thread):
+    print(theme, thread)
+    thread_data = Threads.query.filter_by(theme=theme, thread_name=thread).first()
+    if request.method == 'POST':
+        threadId = thread_data.id
+        postText = request.form.get('posttext')
+        postDate = datetime.datetime.now()
+        if 'file' in request.files:
+            file = request.files['file']
+            filename = secure_filename(file.filename)
+            if len(filename) != 0:
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        db.session.add(Posts(post_text = postText, post_date = postDate, thread_id = threadId, image_name = filename))
+        db.session.commit()
+    posts = Posts.query.filter_by(thread_id = thread_data.id)
+    return render_template('threadPage.html', thread = thread, thread_content = thread_data, theme = theme, posts = posts)
+
+@app.route('/create-thread', methods = ['POST'])
+def create_thread():
+    if request.method == 'POST':
+        threadname = request.form.get('threadname')
+        threadtext = request.form.get('threadtext')
+        themeforthread = request.form.get('theme')
+        db.session.add(Threads(thread_name = threadname, thread_text = threadtext, theme = themeforthread))
+        db.session.commit()
+        return redirect ('/{}'.format(themeforthread))
+        #return redirect ('/<theme>')
+@app.route('/upload-media', methods = ['POST','GET'])
+def upload_media():
+    if 'file' in request.files:
+        file = request.files['file']
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    return render_template('test.html', files = filename_list)
+
+
 #-----------------------------ADMIN ROUTES-----------------------------#
 @app.route('/add-theme', methods = ['GET', 'POST']) #easy adding new theme system
 @auth.login_required
