@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ theme_name }}</title>
-</head>
-<body>
+    {% extends "base.html" %}
+    {% block content %}
     <h3>{{ theme_name }}</h3>
+    {{ theme_context.theme_context }}
     <button id="openFormButton">Створити Тред!</button>
     <form id="textForm" style="display: none;" action="/create-thread" method="post">
         <p>Введіть назву треда:</p><br>
@@ -24,7 +19,11 @@
     {% for i in thread %}
     <h4>--------------------</h4>
     <a href="/{{theme_name}}/{{ i.thread_name }}">{{i.thread_name}}</a><br>
+    {% if adminLogged == True %}
+    <form action="/remove-thread" method="post">
+        <button name="remove" value="{{ i.id }}">remove</button>
+    </form>
+    {% endif %}
     {{ i.thread_text }} <br>
     {% endfor %}
-</body>
-</html>
+    {% endblock %}
