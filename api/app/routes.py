@@ -8,12 +8,14 @@ from app.auth import auth, SECRET_KEY
 import sqlalchemy
 import os, datetime
 
+
 app.config['SECRET_KEY'] = 'your_secret_key'
 filename_list = os.listdir(app.config['UPLOAD_FOLDER'])
 print(filename_list)
 @app.route('/debug-page') #page where we can debug or test new features
 def debug_page():
     return render_template('test.html')
+
 
 @app.route('/') # home page where you can choose your theme
 def home_page():
@@ -24,10 +26,14 @@ def home_page():
     admin_logged_in = session.get('admin_logged_in', False)
     return render_template('home.html', themes = themeNames, adminLogged = admin_logged_in)
 
+
 @app.route('/<theme>')
 def theme_page(theme):
+
     threads = Threads.query.filter_by(theme = theme)
-    return render_template('themePage.html', theme_name = theme, thread= threads)
+    admin_logged_in = session.get('admin_logged_in', False)
+    return render_template('themePage.html', theme_name = theme, thread= threads, adminLogged = admin_logged_in, theme_context = Themes.query.filter_by(theme_name = theme).first())
+
 
 @app.route('/<theme>/<thread>', methods = ['GET', 'POST'])
 def thread_page(theme, thread):
@@ -47,6 +53,7 @@ def thread_page(theme, thread):
     posts = Posts.query.filter_by(thread_id = thread_data.id)
     return render_template('threadPage.html', thread = thread, thread_content = thread_data, theme = theme, posts = posts)
 
+
 @app.route('/create-thread', methods = ['POST'])
 def create_thread():
     if request.method == 'POST':
@@ -56,17 +63,12 @@ def create_thread():
         db.session.add(Threads(thread_name = threadname, thread_text = threadtext, theme = themeforthread))
         db.session.commit()
         return redirect ('/{}'.format(themeforthread))
-        #return redirect ('/<theme>')
-@app.route('/upload-media', methods = ['POST','GET'])
-def upload_media():
-    if 'file' in request.files:
-        file = request.files['file']
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    return render_template('test.html', files = filename_list)
+
 
 
 #-----------------------------ADMIN ROUTES-----------------------------#
+    
+
 @app.route('/add-theme', methods = ['GET', 'POST']) #easy adding new theme system
 @auth.login_required
 def add_theme():
@@ -76,15 +78,30 @@ def add_theme():
         db.session.add(Themes(theme_name = themeName, theme_context = themeContext))
         db.session.commit()
         return redirect('/')
-    return render_template('addTheme.html') #for first entering the page with method GET
+
+
+@app.route('/remove-thread', methods = ['POST'])
+@auth.login_required
+def remove_thread():
+    thread_id = request.form.get('remove')
+    Posts.query.filter_by(thread_id= thread_id).delete()
+    Threads.query.filter_by(id=thread_id).delete()
+    db.session.commit()
+    return redirect('/')
+
 
 @app.route('/remove-theme', methods = ['POST'])
 @auth.login_required
 def remove_theme():
     theme = request.form.get('remove')
+    threads_delete = Threads.query.filter_by(theme=theme).all()
+    for thread in threads_delete:
+        Posts.query.filter_by(thread_id = thread.id).delete()
+    Threads.query.filter_by(theme = theme).delete()
     db.session.query(Themes).filter(Themes.theme_name == theme).delete()
     db.session.commit()
     return redirect('/')
+
 
 @app.route('/admin-log')
 @auth.login_required
