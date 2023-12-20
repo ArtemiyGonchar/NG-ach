@@ -10,11 +10,7 @@ import os, datetime
 
 
 app.config['SECRET_KEY'] = '/aGna2&*fg.gdg/edfGHJN3jk$*#kgjfA'
-filename_list = os.listdir(app.config['UPLOAD_FOLDER'])
-print(filename_list)
-@app.route('/debug-page') #page where we can debug or test new features
-def debug_page():
-    return render_template('test.html')
+filename_list = os.listdir(app.config['UPLOAD_FOLDER']) 
 
 
 @app.route('/') # home page where you can choose your theme
@@ -31,9 +27,9 @@ def home_page():
 def theme_page(theme):
 
     threads = Threads.query.filter_by(theme = theme)
-    thread_test = Threads.query.filter_by(theme = theme).first()
-    if thread_test is None:
-        return "Acces denied"
+    theme_test = Themes.query.filter_by(theme_name = theme).first()
+    if theme_test is None: # if user writes non-exist theme
+        return redirect('/')
     admin_logged_in = session.get('admin_logged_in', False)
     return render_template('themePage.html', theme_name = theme, thread= threads, adminLogged = admin_logged_in, theme_context = Themes.query.filter_by(theme_name = theme).first())
 
@@ -42,9 +38,8 @@ def theme_page(theme):
 def thread_page(theme, thread):
     print(theme, thread)
     thread_data = Threads.query.filter_by(theme=theme, thread_name=thread).first()
-    if thread_data is None:
-        return "Acces denied"
-    
+    if thread_data is None: # if user writes non-exist thread or theme
+        return redirect('/{}'.format(theme))
     if request.method == 'POST':
         threadId = thread_data.id
         postText = request.form.get('posttext')
@@ -57,7 +52,8 @@ def thread_page(theme, thread):
         db.session.add(Posts(post_text = postText, post_date = postDate, thread_id = threadId, image_name = filename))
         db.session.commit()
     posts = Posts.query.filter_by(thread_id = thread_data.id)
-    return render_template('threadPage.html', thread = thread, thread_content = thread_data, theme = theme, posts = posts)
+    admin_logged_in = session.get('admin_logged_in', False)
+    return render_template('threadPage.html', thread = thread, thread_content = thread_data, theme = theme, posts = posts, adminLogged = admin_logged_in)
 
 
 @app.route('/create-thread', methods = ['POST'])
@@ -89,7 +85,7 @@ def add_theme():
 @app.route('/remove-thread', methods = ['POST'])
 @auth.login_required
 def remove_thread():
-    thread_id = request.form.get('remove')admin-reg
+    thread_id = request.form.get('remove')
     Posts.query.filter_by(thread_id= thread_id).delete()
     Threads.query.filter_by(id=thread_id).delete()
     db.session.commit()
@@ -109,6 +105,15 @@ def remove_theme():
     return redirect('/')
 
 
+@app.route('/remove-post', methods = ['POST'])
+@auth.login_required
+def remove_post():
+    postId = request.form.get('remove')
+    Posts.query.filter_by(id = postId).delete()
+    db.session.commit()
+    return redirect('/')
+
+
 @app.route('/admin-log')
 @auth.login_required
 def admin_log():
@@ -124,7 +129,7 @@ def logout():
 @app.route('/admin-reg', methods = ['POST', 'GET'])
 def admin_reg():
     if request.method == 'POST':
-        if request.form.get('secretkey') == SECRET_KEY:
+        if request.form.get('secretkey') == SECRET_KEY: # we need key to reg new admin
             admin_name = request.form.get('username')
             admin_password = generate_password_hash(request.form.get('password'))
             db.session.add(Admin(username = admin_name, password = admin_password))
