@@ -9,7 +9,7 @@ import sqlalchemy
 import os, datetime
 
 
-app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SECRET_KEY'] = '/aGna2&*fg.gdg/edfGHJN3jk$*#kgjfA'
 filename_list = os.listdir(app.config['UPLOAD_FOLDER'])
 print(filename_list)
 @app.route('/debug-page') #page where we can debug or test new features
@@ -31,6 +31,9 @@ def home_page():
 def theme_page(theme):
 
     threads = Threads.query.filter_by(theme = theme)
+    thread_test = Threads.query.filter_by(theme = theme).first()
+    if thread_test is None:
+        return "Acces denied"
     admin_logged_in = session.get('admin_logged_in', False)
     return render_template('themePage.html', theme_name = theme, thread= threads, adminLogged = admin_logged_in, theme_context = Themes.query.filter_by(theme_name = theme).first())
 
@@ -39,6 +42,9 @@ def theme_page(theme):
 def thread_page(theme, thread):
     print(theme, thread)
     thread_data = Threads.query.filter_by(theme=theme, thread_name=thread).first()
+    if thread_data is None:
+        return "Acces denied"
+    
     if request.method == 'POST':
         threadId = thread_data.id
         postText = request.form.get('posttext')
@@ -83,7 +89,7 @@ def add_theme():
 @app.route('/remove-thread', methods = ['POST'])
 @auth.login_required
 def remove_thread():
-    thread_id = request.form.get('remove')
+    thread_id = request.form.get('remove')admin-reg
     Posts.query.filter_by(thread_id= thread_id).delete()
     Threads.query.filter_by(id=thread_id).delete()
     db.session.commit()
@@ -115,7 +121,7 @@ def logout():
     return redirect('/')
 
 
-@app.route('/admin-reg', methods = ['POST'])
+@app.route('/admin-reg', methods = ['POST', 'GET'])
 def admin_reg():
     if request.method == 'POST':
         if request.form.get('secretkey') == SECRET_KEY:
