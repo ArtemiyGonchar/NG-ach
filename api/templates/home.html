@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Ng-ach імейджборд ЦНТУ</h1>
+    {% if adminLogged == True %}
+    <p>ADMIN LOGGED</p>
+    <form action="/logout">
+        <button>logout</button>
+    </form>
+    <button id="openFormButton">Створити Тему!</button>
+    <form id = "textForm" style="display: none;" action="/add-theme" method="post">
+        <input type="text" name="themename" placeholder="Enter theme name (short)"><br>
+        <p>enter theme context</p>
+        <textarea name="themecontext"></textarea><br>
+        <button>send</button>
+    </form>
+    {% endif %}
+    <p>Всі існуючі теми: </p>
+    {%for theme in themes %}
+    <a href="/{{ theme }}">{{ theme }}</a>
+    {% if adminLogged == True %}
+    <form action="/remove-theme" method="post">
+        <button name="remove" value="{{ theme }}">remove</button>
+    </form>
+    {% endif %}
+    <br>
+    {% endfor %}
+    <script>
+        document.getElementById('openFormButton').addEventListener('click', function() {
+            document.getElementById('textForm').style.display = 'block';
+        });
+    </script>
+{% endblock %}
