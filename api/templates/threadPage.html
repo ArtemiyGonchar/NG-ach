@@ -1,32 +1,30 @@
     {% extends "base.html" %}
     {% block content %}
     <h2>{{ thread }}</h2>
-    {{thread_content.thread_text}}<br>
-
+    <p class="longtext">{{thread_content.thread_text}}</p><br>
     <button id="openFormButton">Відповісти</button>
     
     <form id="textForm" style="display: none;" action="/{{theme}}/{{thread}}" method="post" enctype="multipart/form-data">
-        
+
         <label for="file">Choose an image:</label>
         <input type="file" id="file" name="file" accept="image/*">
         <br>
-        <button type="submit">Upload</button>
-
         <textarea name="posttext"></textarea>
         <input type="hidden" name="theme" value="{{ theme_name }}">
         <button>Надіслати</button>
     </form>
-    <script>
-        document.getElementById('openFormButton').addEventListener('click', function() {
-            document.getElementById('textForm').style.display = 'block';
-        });
-    </script>
     {% for post in posts %}
     <h3>------------</h3>
-    {{post.post_text}}<br>
+    <p class="longtext">{{post.post_text}}</p><br>
     {% if post.image_name %}
-    <img src="../uploads/images/{{ post.image_name }}" alt="nema"><br>
+    <img src="../uploads/images/{{ post.image_name }}" alt="nema" class="image-max"><br>
     {% endif %}
     {{post.post_date}}
+    {% if adminLogged == True %}
+    <br>
+    <form action="/remove-post" method="post">
+        <button name="remove" value="{{ post.id }}">remove</button>
+    </form>
+    {% endif %}
     {% endfor %}
     {% endblock %}

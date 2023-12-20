@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ng-ach</title>
-    <style>
-        .centering{
-            text-align: center;
-        }
-
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='/static/css/style.css') }}">
+    
 </head>
 <body>
-    <p class="centering"><a href="/"><img src="/uploads/app_images/ngachhome.png" width="200" height="100"alt="Пример"></a></p>
+    <p class="centering"><a href="/"><img src="/uploads/app_images/ngachhome1.png" width="200" height="100"alt="Пример"></a></p>
     {% block content %}{% endblock %}
 </body>
+<script>
+    document.getElementById('openFormButton').addEventListener('click', function() {
+        document.getElementById('textForm').style.display = 'block';
+    });
+</script>
 </html>
