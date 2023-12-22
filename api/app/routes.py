@@ -40,21 +40,27 @@ def thread_page(theme, thread):
     thread_data = Threads.query.filter_by(theme=theme, thread_name=thread).first()
     if thread_data is None: # if user writes non-exist thread or theme
         return redirect('/{}'.format(theme))
-    if request.method == 'POST':
-        threadId = thread_data.id
-        postText = request.form.get('posttext')
-        postDate = datetime.datetime.now()
-        if 'file' in request.files:
-            file = request.files['file']
-            filename = secure_filename(file.filename)
-            if len(filename) != 0:
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        db.session.add(Posts(post_text = postText, post_date = postDate, thread_id = threadId, image_name = filename))
-        db.session.commit()
     posts = Posts.query.filter_by(thread_id = thread_data.id)
     admin_logged_in = session.get('admin_logged_in', False)
     return render_template('threadPage.html', thread = thread, thread_content = thread_data, theme = theme, posts = posts, adminLogged = admin_logged_in)
 
+
+@app.route('/create-post', methods = ['POST'])
+def create_post():
+    theme = request.form.get('theme')
+    thread = request.form.get('thread')
+    thread_data = Threads.query.filter_by(theme=theme, thread_name=thread).first()
+    threadId = thread_data.id
+    postText = request.form.get('posttext')
+    postDate = datetime.datetime.now()
+    if 'file' in request.files:
+        file = request.files['file']
+        filename = secure_filename(file.filename)
+        if len(filename) != 0:
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    db.session.add(Posts(post_text = postText, post_date = postDate, thread_id = threadId, image_name = filename))
+    db.session.commit()
+    return redirect('/{}/{}'.format(theme, thread))
 
 @app.route('/create-thread', methods = ['POST'])
 def create_thread():
