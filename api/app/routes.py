@@ -62,6 +62,7 @@ def create_post():
     db.session.commit()
     return redirect('/{}/{}'.format(theme, thread))
 
+
 @app.route('/create-thread', methods = ['POST'])
 def create_thread():
     if request.method == 'POST':
