@@ -2,6 +2,11 @@
     {% block content %}
     <h2>{{ thread }}</h2>
     <p class="longtext">{{thread_content.thread_text}}</p><br>
+
+    <form action="/{{theme}}">
+        <button>Назад</button>
+    </form><br>
+
     <button id="openFormButton">Відповісти</button>
     
     <form id="textForm" style="display: none;" action="/{{theme}}/{{thread}}" method="post" enctype="multipart/form-data">
@@ -11,7 +16,7 @@
         <br>
         <textarea name="posttext"></textarea>
         <input type="hidden" name="theme" value="{{ theme_name }}">
-        <button>Надіслати</button>
+        <button type="submit" id="submitButton">Надіслати</button>
     </form>
     {% for post in posts %}
     <h3>------------</h3>

@@ -12,6 +12,8 @@
     {% block content %}{% endblock %}
 </body>
 <script>
+
+    document.getElementById("textForm").value = "";
     document.getElementById('openFormButton').addEventListener('click', function() {
         document.getElementById('textForm').style.display = 'block';
     });

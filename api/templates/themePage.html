@@ -2,6 +2,10 @@
     {% block content %}
     <h2>{{ theme_name }}</h2>
     {{ theme_context.theme_context }}<br>
+    <form action="/">
+        <button>Назад</button>
+    </form> <br>
+    
     <button id="openFormButton">Створити Тред!</button>
     <form id="textForm" style="display: none;" action="/create-thread" method="post">
         Введіть назву треда:<br>
