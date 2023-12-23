@@ -26,7 +26,7 @@ def home_page():
 @app.route('/<theme>')
 def theme_page(theme):
 
-    threads = Threads.query.filter_by(theme = theme)
+    threads = Threads.query.filter_by(theme = theme).order_by(Threads.id.desc())
     theme_test = Themes.query.filter_by(theme_name = theme).first()
     if theme_test is None: # if user writes non-exist theme
         return redirect('/')
@@ -93,6 +93,9 @@ def add_theme():
 @auth.login_required
 def remove_thread():
     thread_id = request.form.get('remove')
+    for image in Posts.query.filter_by(thread_id= thread_id):
+        if image.image_name:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], image.image_name))
     Posts.query.filter_by(thread_id= thread_id).delete()
     Threads.query.filter_by(id=thread_id).delete()
     db.session.commit()
@@ -105,6 +108,9 @@ def remove_theme():
     theme = request.form.get('remove')
     threads_delete = Threads.query.filter_by(theme=theme).all()
     for thread in threads_delete:
+        for image in Posts.query.filter_by(thread_id= thread.id):
+            if image.image_name:
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], image.image_name))
         Posts.query.filter_by(thread_id = thread.id).delete()
     Threads.query.filter_by(theme = theme).delete()
     db.session.query(Themes).filter(Themes.theme_name == theme).delete()
@@ -116,6 +122,10 @@ def remove_theme():
 @auth.login_required
 def remove_post():
     postId = request.form.get('remove')
+    image = Posts.query.filter_by(id = postId).first()
+    if image.image_name:
+        #print(image.image_name)
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], image.image_name))
     Posts.query.filter_by(id = postId).delete()
     db.session.commit()
     return redirect('/')
