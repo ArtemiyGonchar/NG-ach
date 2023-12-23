@@ -9,13 +9,14 @@
 
     <button id="openFormButton">Відповісти</button>
     
-    <form id="textForm" style="display: none;" action="/{{theme}}/{{thread}}" method="post" enctype="multipart/form-data">
-
+    <!-- <form id="textForm" style="display: none;" action="/{{theme}}/{{thread}}" method="post" enctype="multipart/form-data"> -->
+    <form id="textForm" style="display: none;" action="/create-post" method="post" enctype="multipart/form-data">    
         <label for="file">Choose an image:</label>
         <input type="file" id="file" name="file" accept="image/*">
         <br>
         <textarea name="posttext"></textarea>
-        <input type="hidden" name="theme" value="{{ theme_name }}">
+        <input type="hidden" name="theme" value="{{ theme }}">
+        <input type="hidden" name="thread" value="{{ thread }}">
         <button type="submit" id="submitButton">Надіслати</button>
     </form>
     {% for post in posts %}
